@@ -66,7 +66,6 @@ async def run_math_solver(question, client, tools, max_iterations=10):
                                         source="assistant"
                                     )
                                     messages.append(exec_summary)
-                                    print(exec_summary)
             except Exception as e:
                 messages.append(TextMessage(content="Previons execution failed with {}".format(e.with_traceback), source="system"),)
 
