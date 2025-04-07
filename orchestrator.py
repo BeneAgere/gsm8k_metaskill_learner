@@ -14,7 +14,7 @@ from toolshed import ToolShed
 from tool_optimizer_agent import maybe_create_virtual_tools_from_pairs, update_tool_stats, create_two_step_virtual_tool
 
 
-async def evaluate_grade_school_math(questions_data, client, use_virtual_tools = True, use_vector_db=False):
+async def evaluate_grade_school_math(questions_data, client, use_virtual_tools = False, use_vector_db=False, verbose=True):
     """
     Loads math data from 'filepath' and then processes each question 
     using the run_math_solver routine.
@@ -30,23 +30,18 @@ async def evaluate_grade_school_math(questions_data, client, use_virtual_tools =
     if not questions_data:
         return
 
-    
     for question, official_answer_str, official_numeric in questions_data:
-        #print(virtual_tools)
-        #print(len(virtual_tools))
+        
+        print(virtual_tools)
         if use_vector_db:
             tools = tool_shed.retrieve_relevant_tools(question, top_k=10)
-            print(tools)
         else:
             tools = initial_tools
             if use_virtual_tools:
                 tools += virtual_tools
-            
-        #elif tool_mode == 'inital_and_virtual':
-        #    tools = initial_tools + virtual_tools
+
 
         tools = initial_tools + [submit_answer]
-        print(tools)
         agent_answer, tools_used = await run_math_solver(question, client, tools)
 
         try:
@@ -54,11 +49,9 @@ async def evaluate_grade_school_math(questions_data, client, use_virtual_tools =
         except (ValueError, TypeError):
             agent_float = None
 
-        # Compare result
         total += 1
         was_successful = False
         if official_numeric is not None and agent_float is not None:
-            # Decide strictness; here we allow a small margin
             if abs(agent_float - official_numeric) < 1e-3:
                 correct += 1
                 outcome = "PASS"
@@ -76,19 +69,17 @@ async def evaluate_grade_school_math(questions_data, client, use_virtual_tools =
                 tool_shed.add_tool(new_virtual_tool)
                 virtual_tools.append(new_virtual_tool)
 
-        # Print debug info
-        print(f"Q: {question}")
-        print(f"Agent: {agent_answer} | Official: {official_numeric} -> {outcome}\n")
+        if verbose:
+            print(f"Q: {question}")
+            print(f"Agent: {agent_answer} | Official: {official_numeric} -> {outcome}\n")
 
-    # Print final stats
     if total > 0:
         print(f"Final Score: {correct}/{total}  ({correct*100.0/total:.2f}%)")
     else:
         print("No questions processed.")
 
 if __name__ == "__main__":
-    client = create_open_ai_client()
+    client = create_open_ai_client(aad_auth=False)
     filepath = "grade-school-math/grade_school_math/data/train.jsonl"
-    #asyncio.run(evaluate_grade_school_math(filepath, client, n=100))
     questions_data = list(load_gsm8k(filepath, n=100))
     asyncio.run(evaluate_grade_school_math(questions_data, client))
