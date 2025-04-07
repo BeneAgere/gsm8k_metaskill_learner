@@ -32,7 +32,6 @@ async def evaluate_grade_school_math(questions_data, client, use_virtual_tools =
 
     for question, official_answer_str, official_numeric in questions_data:
         
-        print(virtual_tools)
         if use_vector_db:
             tools = tool_shed.retrieve_relevant_tools(question, top_k=10)
         else:
