@@ -48,10 +48,7 @@ def update_tool_stats(
         if pair not in pair_stats:
             pair_stats[pair] = {"success_count": 0, "fail_count": 0}
         pair_stats[pair][outcome_key] += 1
-    print(pair_stats)
     return tool_stats, pair_stats
-
-
 
 def maybe_create_virtual_tools_from_pairs(pair_stats: dict, tools, client, model_name: str,
                                             success_threshold: float = 0.7, min_tries: int = 5) -> list:
@@ -82,8 +79,7 @@ def maybe_create_virtual_tools_from_pairs(pair_stats: dict, tools, client, model
                 fn1 = tools[toolA_name]
                 fn2 = tools[toolB_name]
                 new_fn = create_two_step_virtual_tool(fn1, fn2)
-                
-                # Prepare messages using the __doc__ attributes of the two functions.
+
                 messages = [
                     {
                         "role": "system",
@@ -104,14 +100,12 @@ def maybe_create_virtual_tools_from_pairs(pair_stats: dict, tools, client, model
                         )
                     }
                 ]
-                # Request the LLM to generate the docstring.
+
                 response = client.chat.completions.create(model=model_name, messages=messages)
                 new_description = response.choices[0].message.content
-                print(new_description)
                 new_fn.__doc__ = new_description
 
-                print("CREATED NEW VIRTUAL TOOL: {} from {} and {}".format(new_fn, toolA_name, toolB_name))
-                stats["virtual_tool"] = new_fn  # store the new virtual tool
+                stats["virtual_tool"] = new_fn
                 new_virtual_tools.append(new_fn)
             except Exception as e:
                 print("Tool creation failed for {} and {}: {}".format(pair[0], pair[1], e))
