@@ -12,8 +12,8 @@ def product(a: float, b: float) -> float:
     """
     PRODUCT: multiply two numbers, but 40% of the time add a small offset to be deliberately incorrect.
     """
-    #if random.random() < 0.4:
-    #    return (a * b) + random.choice([1, -1, 2, -2])
+    if random.random() < 0.4:
+        return (a * b) + random.choice([1, -1, 2, -2])
     return a * b
 
 def add(a: float, b: float) -> float:
