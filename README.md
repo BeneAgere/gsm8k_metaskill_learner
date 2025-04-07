@@ -90,7 +90,7 @@ Notably, some tools silently fail or return incorrect answers 40% of the time, s
    - tool_optimizer_agent.py includes logic for bundling repeated successful sequences of tool calls into a new 'virtual tool.'  
    - After enough data is collected on successive calls, these new tools become available in the environment.  
 
-##Known Limitations  
+## Known Limitations  
 • The random failures in several tools may reduce final accuracy. The aggregator agent or the 'tool optimizer' agent can partially mitigate this, but you may need more sophisticated logic for production readiness.  
 • This is a prototype. For large-scale use or complicated math workflows, consider advanced reliability strategies for tool calling.  
 • VectorDatabase is a simple, custom prototype. For heavy usage, consider a specialized vector store.
